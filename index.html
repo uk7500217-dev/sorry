@@ -1,137 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
-    <title>Healing Heart</title>
+    <title>The Restoration</title>
     <style>
-        body {
-            background: #121212;
-            color: white;
-            text-align: center;
-            font-family: 'Segoe UI', sans-serif;
+        :root { --bg: #050505; --heart-red: #ff2e2e; --deep-red: #2a0000; }
+
+        body { 
+            background: var(--bg); color: white; height: 100vh; margin: 0;
+            display: flex; align-items: center; justify-content: center;
+            font-family: 'Georgia', serif; overflow: hidden;
+            transition: background 2.5s ease;
+        }
+
+        #flash {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: white; opacity: 0; z-index: 999; pointer-events: none;
+            transition: opacity 0.4s;
+        }
+
+        /* This container keeps everything in a vertical line */
+        #main-container {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .card {
-            background: #1e1e1e;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            width: 400px;
-            border: 1px solid #333;
-        }
-
-        #heart-display {
-            font-size: 100px;
-            margin-bottom: 20px;
-            transition: 0.5s;
-            opacity: 0.4;
-            filter: grayscale(1);
-        }
-
-        .healed {
-            opacity: 1 !important;
-            filter: grayscale(0) !important;
-            transform: scale(1.1);
-            text-shadow: 0 0 20px rgba(255, 77, 77, 0.6);
-        }
-
-        .progress-container {
+            text-align: center;
             width: 100%;
-            height: 15px;
-            background: #333;
-            border-radius: 10px;
-            margin: 30px 0;
-            overflow: hidden;
-            border: 1px solid #444;
+            z-index: 10;
         }
 
-        .progress-fill {
-            width: 0%;
-            height: 100%;
-            background: linear-gradient(90deg, #ff4d4d, #ff8080);
-            transition: 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        /* Shard Container */
+        .heart-wrapper { 
+            position: relative; width: 300px; height: 300px;
+            transition: transform 1.2s cubic-bezier(0.7, 0, 0.3, 1), opacity 0.8s;
         }
 
-        button {
-            background: #ff4d4d;
-            color: white;
-            border: none;
-            padding: 15px 35px;
-            border-radius: 30px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
-            font-size: 16px;
-            box-shadow: 0 4px 15px rgba(255, 77, 77, 0.3);
+        .shard { 
+            position: absolute; width: 100%; height: 100%; 
+            background: linear-gradient(to bottom, #8b0000, #330000);
+            transition: all 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            opacity: 0.2; filter: blur(5px);
         }
 
-        button:hover {
-            background: #ff3333;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(255, 77, 77, 0.5);
+        /* Curved Heart Geometry */
+        .s1 { clip-path: polygon(50% 30%, 20% 10%, 0% 25%, 0% 50%, 50% 50%); transform: translate(-300px, -200px) rotate(45deg); }
+        .s2 { clip-path: polygon(50% 30%, 80% 10%, 100% 25%, 100% 50%, 50% 50%); transform: translate(300px, -150px) rotate(-30deg); }
+        .s3 { clip-path: polygon(0% 50%, 50% 50%, 50% 95%); transform: translate(-250px, 300px) rotate(120deg); }
+        .s4 { clip-path: polygon(50% 50%, 100% 50%, 50% 95%); transform: translate(280px, 250px) rotate(-90deg); }
+
+        .mended { transform: translate(0, 0) rotate(0deg) !important; opacity: 1 !important; filter: blur(0) !important; }
+
+        /* Final Breathing Heart (Relative so it doesn't float over text) */
+        #final-heart {
+            font-size: 150px; display: none; 
+            margin-bottom: 30px; /* Space between heart and text */
+            animation: breathe 4s infinite ease-in-out;
         }
 
-        button:disabled {
-            background: #444;
-            cursor: not-allowed;
-            transform: none;
-            box-shadow: none;
+        @keyframes breathe {
+            0%, 100% { color: white; filter: drop-shadow(0 0 20px white); transform: scale(1); }
+            50% { color: #ff2e2e; filter: drop-shadow(0 0 60px #ff2e2e); transform: scale(1.1); }
         }
 
-        #sorry-msg {
-            margin-top: 25px;
-            font-size: 18px;
-            color: #ffb3b3;
-            opacity: 0;
-            transition: 2s;
-            font-weight: 300;
-            line-height: 1.5;
+        .zoom-out { transform: scale(30); opacity: 0; }
+
+        #ui { margin-top: 40px; transition: opacity 0.5s; }
+        
+        /* Message Box Styling */
+        #message-box { 
+            opacity: 0; transform: translateY(30px); 
+            transition: 2s ease; 
+            max-width: 80%;
+        }
+
+        button { background: none; border: 1px solid #444; color: #888; padding: 12px 35px; cursor: pointer; letter-spacing: 3px; font-family: inherit; }
+        button:hover { border-color: white; color: white; }
+
+        @keyframes shake {
+            0%, 100% { transform: translate(0,0); }
+            25% { transform: translate(-5px,-2px); }
+            75% { transform: translate(5px,2px); }
         }
     </style>
 </head>
-
 <body>
-    <div class="card">
-        <div id="heart-display">💔</div>
 
-        <div class="progress-container">
-            <div id="bar" class="progress-fill"></div>
-        </div>
+<div id="flash"></div>
 
-        <button id="healBtn" onclick="nextStep()">Tap to Heal</button>
-        <div id="sorry-msg">"I'm so sorry. I hope we can make our heart whole again. I promise to do better. ❤️"</div>
+<div id="main-container">
+    <div class="heart-wrapper" id="shard-container">
+        <div id="shard0" class="shard s1"></div>
+        <div id="shard1" class="shard s2"></div>
+        <div id="shard2" class="shard s3"></div>
+        <div id="shard3" class="shard s4"></div>
     </div>
 
-    <script>
-        let clicks = 0;
-        const totalSteps = 5;
-        const btnMessages = ["Healing...", "Almost there...", "Just a bit more...", "One last piece...", "Whole Again"];
+    <div id="final-heart">❤️</div>
 
-        function nextStep() {
-            clicks++;
-            let percent = (clicks / totalSteps) * 100;
-            document.getElementById('bar').style.width = percent + "%";
+    <div id="ui">
+        <div id="log" style="color:#555; margin-bottom:20px; letter-spacing: 2px;">[ FRACTURED ]</div>
+        <button id="mendBtn" onclick="doMend()">RECONSTRUCT</button>
+    </div>
 
-            // Gradually bring back color and light
-            document.getElementById('heart-display').style.opacity = 0.4 + (clicks * 0.12);
+    <div id="message-box">
+        <h1 style="font-style:italic; margin: 0; font-size: 2.5rem;">I'm truly sorry jannah.</h1>
+        <p style="opacity:0.7; margin-top: 15px; font-size: 1.1rem;">Thank you for mending this with me.</p>
+    </div>
+</div>
 
-            if (clicks === totalSteps) {
-                document.getElementById('heart-display').innerHTML = "❤️";
-                document.getElementById('heart-display').classList.add('healed');
-                document.getElementById('healBtn').disabled = true;
-                document.getElementById('healBtn').innerHTML = "Healed";
-                document.getElementById('sorry-msg').style.opacity = "1";
-            } else {
-                document.getElementById('healBtn').innerHTML = btnMessages[clicks - 1];
-            }
-        }
-    </script>
+<script>
+    let step = 0;
+    async function doMend() {
+        const res = await fetch(`/mend/${step}`);
+        const data = await res.json();
+        if (data.done) return;
+
+        document.getElementById(`shard${step}`).classList.add('mended');
+        document.body.style.animation = `shake ${data.shake} ease-out`;
+        setTimeout(() => document.body.style.animation = '', 500);
+
+        if (step === 3) { triggerEnding(); }
+        step++;
+    }
+
+    function triggerEnding() {
+        document.getElementById('ui').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('shard-container').classList.add('zoom-out');
+            
+            setTimeout(() => {
+                const flash = document.getElementById('flash');
+                flash.style.opacity = '1';
+                
+                setTimeout(() => {
+                    document.body.style.background = '#2a0000'; 
+                    document.getElementById('shard-container').style.display = 'none';
+                    document.getElementById('ui').style.display = 'none';
+                    flash.style.opacity = '0';
+                    
+                    // Reveal the heart and text separately but in order
+                    document.getElementById('final-heart').style.display = 'block';
+                    
+                    setTimeout(() => {
+                        const msg = document.getElementById('message-box');
+                        msg.style.opacity = '1';
+                        msg.style.transform = 'translateY(0)';
+                    }, 500);
+                }, 400);
+            }, 800);
+        }, 1200);
+    }
+</script>
+
 </body>
-
 </html>
